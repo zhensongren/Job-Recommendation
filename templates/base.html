@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}
+    <meta charset="utf-8">
+    <title>Your job recommendations</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" type="text/css">
+    {% endblock %}
+</head>
+<body>
+
+    {% for message in get_flashed_messages() %}
+    <div class="alert">{{ message }}</div>
+	{% endfor %}
+
+    <h2>
+        Your job recommendations
+    </h2>
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('index') }}">Home</a></li>
+        </ul>
+    </nav>
+    {% block content %}{% endblock %}
+    <footer>
+        <small>&copy; 2019 <a href="35.192.189.73:5000/">Job Recommendation Engine</a></small>
+	</footer>
+</body>
+</html>

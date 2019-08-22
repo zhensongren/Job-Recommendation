@@ -8,6 +8,8 @@ verify_ssl = true
 [packages]
 flask-sqlalchemy = "*"
 flask = "*"
+python-docx = "*"
+pypdf2 = "*"
 
 [requires]
 python_version = "2.7"
