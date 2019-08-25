@@ -1,9 +1,9 @@
 import os
 import sys
 import click
-from flask import Flask, render_template, request, redirect, flash, url_for
+from flask import Flask, render_template, request, redirect, flash, url_for,session
 from flask_sqlalchemy import SQLAlchemy
-import get_text
+import score, get_text, PyPDF2
 
 app = Flask(__name__)
 
@@ -14,23 +14,25 @@ if WIN:
 else:
     prefix = 'sqlite:////'
 app.config['SQLALCHEMY_DATABASE_URI'] = prefix + os.path.join(app.root_path, 'data.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+
 
 class User(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
-	name = db.Column(db.String(300))
-	location = db.Column(db.String(100))
-	resume = db.Column(db.LargeBinary)
+	#name = db.Column(db.String(300))
+	#location = db.Column(db.String(100))
+	resume = db.Column(db.String(5000))
 
 
 class Job(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
-	title = db.Column(db.String(60))
+	#title = db.Column(db.String(60))
 	#location = db.Column(db.String(100))
-	post_date = db.Column(db.String(50))
-	job_post = db.Column(db.String(500))
-	link = db.Column(db.String(300))
-	employer = db.Column(db.String(100))
+	#post_date = db.Column(db.String(50))
+	job_post = db.Column(db.String(5000))
+	#link = db.Column(db.String(300))
+	#employer = db.Column(db.String(100))
 	
 	
 #Generate fake data
@@ -60,41 +62,286 @@ def forge():
 	db.session.add(user)
 	db.session.commit()
 	click.echo('Saved the fake data into database.')	
-"""
-	path = '../data/'
-	job_posts = get_text.get_jobs(path)
-	for job, job_post in zip(jobs, job_posts):
-		job['job_post'] = job_post 
-		
-"""
-	
-	
-@app.route('/')
-def index():
-	return render_template('index.html')
-	
-@app.route('/upload', methods=['GET','POST'])
-def upload():
+
+skills = {'access': 'access',
+ 'algorithm': 'algorithm',
+ 'algorithms': 'algorithm',
+ 'amazon': 'amazon',
+ 'analysis': 'analysis',
+ 'analytical': 'analysis',
+ 'analytics': 'analysis',
+ 'android': 'android',
+ 'apache': 'apache',
+ 'api': 'api',
+ 'arduino': 'arduino',
+ 'artificial': 'artificial',
+ 'association': 'association',
+ 'asteradata': 'asteradata',
+ 'aws': 'aws',
+ 'azure': 'azure',
+ 'bash': 'bash',
+ 'bayesian': 'bayesian',
+ 'big': 'big',
+ 'bootstrap': 'bootstrap',
+ 'c#': 'c#',
+ 'c+': 'c+',
+ 'c++': 'c+',
+ 'cassandra': 'cassandra',
+ 'classification': 'classification',
+ 'cleaning': 'cleaning',
+ 'cloud': 'cloud',
+ 'clustering': 'clustering',
+ 'cnn': 'cnn',
+ 'cnns': 'cnn',
+ 'computer': 'computer',
+ 'computing': 'computer',
+ 'css': 'css',
+ 'data': 'data',
+ 'database': 'database',
+ 'databases': 'database',
+ 'db': 'db',
+ 'ddpg': 'ddpg',
+ 'decision': 'decision',
+ 'deep': 'deep',
+ 'design': 'design',
+ 'detection': 'detection',
+ 'development': 'development',
+ 'distributed': 'distributed',
+ 'django': 'django',
+ 'docker': 'docker',
+ 'dqn': 'dqn',
+ 'eclipse': 'eclipse',
+ 'elasticsearch': 'elasticsearch',
+ 'engineer': 'engineer',
+ 'etl': 'etl',
+ 'excel': 'excel',
+ 'extract': 'extract',
+ 'flask': 'flask',
+ 'forest': 'forest',
+ 'fpga': 'fpga',
+ 'gans': 'gans',
+ 'git': 'git',
+ 'github': 'github',
+ 'google': 'google',
+ 'googlevision': 'googlevision',
+ 'gpu': 'gpu',
+ 'hadoop': 'hadoop',
+ 'hbase': 'hbase',
+ 'hdfs': 'hdfs',
+ 'hive': 'hive',
+ 'html': 'html',
+ 'image': 'image',
+ 'impala': 'impala',
+ 'instance': 'instance',
+ 'intelligence': 'intelligence',
+ 'java': 'java',
+ 'javascript': 'javascript',
+ 'jdbc': 'jdbc',
+ 'jira': 'jira',
+ 'jquery': 'jquery',
+ 'js': 'js',
+ 'json': 'json',
+ 'k-nearest': 'k-nearest',
+ 'kafka': 'kafka',
+ 'keras': 'keras',
+ 'kernel': 'kernel',
+ 'language': 'language',
+ 'latex': 'latex',
+ 'learn': 'learn',
+ 'learning': 'learn',
+ 'linear': 'linear',
+ 'linux': 'linux',
+ 'load': 'load',
+ 'logistic': 'logistic',
+ 'lstms': 'lstms',
+ 'machine': 'machine',
+ 'management': 'management',
+ 'mapreduce': 'mapreduce',
+ 'mathematics': 'mathematics',
+ 'matlab': 'matlab',
+ 'matplotlib': 'matplotlib',
+ 'microsoft': 'microsoft',
+ 'mining': 'mining',
+ 'mongodb': 'mongodb',
+ 'ms': 'ms',
+ 'multiple': 'multiple',
+ 'mysql': 'mysql',
+ 'natural': 'natural',
+ 'neighbors': 'neighbors',
+ 'neo': 'neo',
+ 'net': 'neo',
+ 'network': 'network',
+ 'networks': 'network',
+ 'neural': 'neural',
+ 'nlp': 'nlp',
+ 'nltk': 'nltk',
+ 'node': 'node',
+ 'nosql': 'nosql',
+ 'numpy': 'numpy',
+ 'object': 'object',
+ 'ocr': 'ocr',
+ 'ods': 'ods',
+ 'office': 'office',
+ 'olap': 'olap',
+ 'opencv': 'opencv',
+ 'oracle': 'oracle',
+ 'pandas': 'pandas',
+ 'parallel': 'parallel',
+ 'php': 'php',
+ 'pl': 'pl',
+ 'polynomial': 'polynomial',
+ 'postgressql': 'postgressql',
+ 'powerbi': 'powerbi',
+ 'ppo': 'ppo',
+ 'processing': 'processing',
+ 'programming': 'programming',
+ 'pyspark': 'pyspark',
+ 'python': 'python',
+ 'pytorch': 'pytorch',
+ 'random': 'random',
+ 'react': 'react',
+ 'redux': 'redux',
+ 'regression': 'regression',
+ 'reinforcement': 'reinforcement',
+ 'rest': 'rest',
+ 'rnns': 'rnns',
+ 'sas': 'sas',
+ 'scala': 'scala',
+ 'science': 'science',
+ 'scikit': 'scikit',
+ 'scikit-learn': 'scikit-learn',
+ 'scipy': 'scipy',
+ 'segmentation': 'segmentation',
+ 'selenium': 'selenium',
+ 'server': 'server',
+ 'services': 'services',
+ 'signal': 'signal',
+ 'simple': 'simple',
+ 'software': 'software',
+ 'spacy': 'spacy',
+ 'spark': 'spacy',
+ 'sql': 'sql',
+ 'ssrs': 'ssrs',
+ 'statistical': 'statistical',
+ 'statistics': 'statistical',
+ 'studio': 'studio',
+ 'supervised': 'supervised',
+ 'svm': 'svm',
+ 'tableau': 'tableau',
+ 'tensorflow': 'tensorflow',
+ 'teradata': 'teradata',
+ 'testing': 'testing',
+ 'theano': 'theano',
+ 'tnpg': 'tnpg',
+ 'tools': 'tools',
+ 'transform': 'transform',
+ 'trees': 'trees',
+ 'trpo': 'trpo',
+ 'unix': 'unix',
+ 'unsupervised': 'unsupervised',
+ 'vba': 'vba',
+ 'vision': 'vision',
+ 'visual': 'visual',
+ 'visualization': 'visualization',
+ 'web': 'web',
+ 'xml': 'xml',
+ 'Python': 'Python',
+ 'Genism': 'Genism',
+ 'Statistics': 'Statistics',
+ 'Pandas': 'Pandas',
+ 'Git/github': 'Git/github',
+ 'Image recognition': 'Image recognition',
+ 'Java': 'Java',
+ 'NLTK': 'NLTK',
+ 'Probability': 'Probability',
+ 'Scikit-learn': 'Scikit-learn',
+ 'SQL': 'SQL',
+ 'Natural language processing': 'Natural language processing',
+ 'Scala': 'Scala',
+ 'A/B testing': 'A/B testing',
+ 'TensorFlow': 'TensorFlow',
+ 'Mongodb': 'Mongodb',
+ 'speech recognition': 'speech recognition',
+ 'C++': 'C++',
+ 'HDFS': 'HDFS',
+ 'Multivariable Calculus': 'Multivariable Calculus',
+ 'PyTorch': 'PyTorch',
+ 'Flask': 'Flask',
+ 'Language interpretation': 'Language interpretation',
+ 'MATLAB': 'MATLAB',
+ 'Hive': 'Hive',
+ 'Linear Algebra': 'Linear Algebra',
+ 'Keras': 'Keras',
+ 'AWS': 'AWS',
+ 'Autonomous\xa0driving': 'Autonomous\xa0driving',
+ 'R': 'R',
+ 'Hadoop': 'Hadoop',
+ 'Information theory': 'Information theory',
+ 'CV': 'CV',
+ 'Linux/Unix': 'Linux/Unix',
+ 'Recommender System': 'Recommender System',
+ 'Spark': 'Spark',
+ 'Real and complex anlysis': 'Real and complex anlysis',
+ 'NLP': 'NLP',
+ 'Git': 'Git',
+ 'Preventive health care': 'Preventive health care',
+ 'Optimization': 'Optimization',
+ 'Machine Learning': 'Machine Learning',
+ 'HTML': 'HTML',
+ 'Deep Learning': 'Deep Learning',
+ 'CSS': 'CSS',
+ 'Numpy': 'Numpy',
+ 'JavaScript': 'JavaScript',
+ 'Scipy': 'Scipy',
+ 'system design': 'system design',
+ 'Matplotlib': 'Matplotlib',
+ 'MySQL': 'MySQL',
+ 'PostgreSQL': 'PostgreSQL',
+ 'microservice': 'microservice',
+ 'kubernetes': 'kubernetes',
+ 'tensorflow serving': 'tensorflow serving',
+ 'airflow': 'airflow',
+ 'jenkins': 'jenkins',
+ 'teamcity': 'teamcity',
+ 'monitor': 'monitor',
+ 'shell script': 'shell script',
+ 'AWS lambda': 'AWS lambda'}
+
+@app.route('/index', methods=['GET','POST'])
+@app.route('/', methods=['GET','POST'])
+def upload_resume():
+	db.drop_all()
+	db.create_all()
 	if request.method == 'POST':
-        # check if the post request has the file part
-		if 'file' not in request.files:
-			flash('No file part')
+		if 'resume' not in request.form:
+			flash('No input yet')
 			return redirect(request.url)
-		file = request.files['file']
-		resume = User(name=file.filename, resume=file.read())
+		resume = request.form['resume']
+		resume = User(resume=resume)
 		db.session.add(resume)
 		db.session.commit()
-		#return 'Saved ' + file.filename + ' to the database!'
-		### return top 10 jobs you need to consider today.
-		return render_template('jobs.html')
-		# return render_template('uploaded.html')
+		return redirect('sendjob') 
+		#return 'Saved  to the database!'
+	return render_template('upload_resume.html')
+
+	
+@app.route('/sendjob', methods=['GET', 'POST'])
+def send_job():
+	if request.method == 'POST':
+		if 'job_post' not in request.form:
+			flash('No input yet')
+			return redirect(request.url)
+		job_post = request.form['job_post']
+		#job_post = Job(job_post=job_post)
+		#db.session.add(job_post)
+		#db.session.commit()
 		
-# @app.route('/jobs', methods=['GET', 'POST'])
-# def get_jobs():
-
-
-
-		# return render_template('jobs.html', jobs=jobs)
+		user = User.query.first()
+		resume=user.resume
+		matching_score = score.get_score(skills=skills, job_post=job_post, resume=resume)
+		return render_template('score.html',matching_score=matching_score)
+	else:
+		return render_template('send_job.html')
 
 if __name__=='__main__':
 	app.run(debug=True)

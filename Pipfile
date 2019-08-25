@@ -10,6 +10,8 @@ flask-sqlalchemy = "*"
 flask = "*"
 python-docx = "*"
 pypdf2 = "*"
+pandas = "*"
+sklearn = "*"
 
 [requires]
 python_version = "2.7"
