@@ -344,4 +344,4 @@ def send_job():
 		return render_template('send_job.html')
 
 if __name__=='__main__':
-	app.run(debug=True)
+	app.run(debug=True, host="0.0.0.0", port=5000)
