@@ -309,22 +309,42 @@ skills = {'access': 'access',
 
 @app.route('/index', methods=['GET','POST'])
 @app.route('/', methods=['GET','POST'])
-def upload_resume():
+@app.route('/home', methods=['GET','POST'])
+def home():
 	db.drop_all()
 	db.create_all()
 	if request.method == 'POST':
+		# Get the resume and save it into to database.
 		if 'resume' not in request.form:
 			flash('No input yet')
 			return redirect(request.url)
-		resume = request.form['resume']
-		resume = User(resume=resume)
-		db.session.add(resume)
-		db.session.commit()
-		return redirect('sendjob') 
+		else:
+			resume = request.form['resume']
+			resume = User(resume=resume)
+			db.session.add(resume)
+			db.session.commit()
+			
+		# Get the job post and save it into database.
+		if 'job_description' not in request.form:
+			flash('No input yet')
+			return redirect(request.url)
+		else:
+		# Save the submited plain text data into database
+			job_post = request.form['job_description']
+			job_post = Job(job_post=job_post)
+			db.session.add(job_post)
+			db.session.commit()
+		# Query the database and get the matching score.
+		user = User.query.first()
+		job = Job.query.first()
+		resume=user.resume
+		job_post=job.job_post
+		matching_score = score.get_score(skills=skills, job_post=job_post, resume=resume)
+		return render_template('home.html',matching_score=matching_score)
+	else:
+		return render_template('home.html')
 		#return 'Saved  to the database!'
-	return render_template('upload_resume.html')
-
-	
+		
 @app.route('/sendjob', methods=['GET', 'POST'])
 def send_job():
 	if request.method == 'POST':
@@ -332,9 +352,9 @@ def send_job():
 			flash('No input yet')
 			return redirect(request.url)
 		job_post = request.form['job_post']
-		#job_post = Job(job_post=job_post)
-		#db.session.add(job_post)
-		#db.session.commit()
+		job_post = Job(job_post=job_post)
+		db.session.add(job_post)
+		db.session.commit()
 		
 		user = User.query.first()
 		resume=user.resume
