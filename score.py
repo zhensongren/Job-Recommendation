@@ -7,14 +7,14 @@
 # install the PyPDF2 for PDF documents 
 # pip install PyPDF2
 import os
-import docx
-import PyPDF2
+#import docx
+#import PyPDF2
 
 #import pandas as pd
 #import numpy as np
 from text_vectorizer import TextVectorizer 
 from sklearn.metrics.pairwise import cosine_similarity
-import get_text
+#import get_text
 """
 ############################ Extract words from data files #################################################################
 ### Read content from resume in PDF format

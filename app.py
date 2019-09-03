@@ -3,7 +3,9 @@ import sys
 import click
 from flask import Flask, render_template, request, redirect, flash, url_for,session
 from flask_sqlalchemy import SQLAlchemy
-import score, get_text, PyPDF2
+import score
+
+# get_text, PyPDF2
 
 app = Flask(__name__)
 
