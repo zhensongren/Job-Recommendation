@@ -15,7 +15,7 @@ import PyPDF2
 from text_vectorizer import TextVectorizer 
 from sklearn.metrics.pairwise import cosine_similarity
 import get_text
-
+"""
 ############################ Extract words from data files #################################################################
 ### Read content from resume in PDF format
 path = os.path.join('..', 'data', 'DS training LIGANG BAI.pdf')
@@ -49,7 +49,7 @@ job0 = tv.transform(jobs[0])
 
 ZS_score = cosine_similarity(resume, job0)[0][0]
 bai_score = cosine_similarity(bai, job0)[0][0]
-
+"""
 ############################### Define a function for calculating matching score #######################################
 # Need the skills key word file for vectorization.
 def get_score(skills, job_post, resume):
@@ -58,6 +58,8 @@ def get_score(skills, job_post, resume):
 	resume = tv.transform(resume)
 	job = tv.transform(job_post) 
 	return cosine_similarity(resume, job)[0][0]
+
+"""
 ############################### Save the calculated Cosine simlarity to 'score.txt' file ####################################
 score = open('../data/score.txt', 'w')
 score.write('My resume and MLE job matching score : {} \r\n'.format(ZS_score))
@@ -65,3 +67,4 @@ score.write('Bai resume and MLE job matching score : {} \r\n'.format(bai_score))
 score.write('\r\n')
 score.write('Job post used :\r\n {} \r\n'.format(jobs[0]))
 score.close()
+"""
