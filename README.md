@@ -11,4 +11,6 @@ $ pipenv shell
 
 $ python app.py
 
-* Running on http://127.0.0.1:5000/
+$ local version running on http://127.0.0.1:5000/
+
+$ Google Cloud version running on http://35.192.189.73:5000/
