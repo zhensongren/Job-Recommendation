@@ -1,40 +1,57 @@
 <!DOCTYPE html>
 <html>
+
 <title>Job Recommendation Home</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+
 <body>
 
 <div align="center">
 	<header class="w3-container w3-teal">
-	  <h1>Calculate your matching score!</h1>
+	      <h1>What type of data job am I applying?</h1> 
+    <p>Copy and paste your job description here and see its type.</p> 
 	</header>
 </div>
 
 <div align="center">
-	<p class="w3-container">The required skills key words in job description and your resume can be extracted. We'll calculate the matching score to let your know whether you have a good chance or not.
-	</p>  
-	
 	<form method="POST", action="/">
-		<div class="w3-container w3-half">
-			<p> Job description</p>
-			<textarea autofocus rows="8" cols="60"   name="job_description" id="job_description"></textarea>
-		</div>
-	 
+	
+	
+	<div class="w3-container">
 		<div class="w3-container w3-half">
 			<p> Resume </p>
-			<textarea autofocus rows="8" cols="60"  name="resume" id="resume"></textarea>
+			<textarea rows="12" cols="60" name="resume" id="resume" class="form-control" placeholder="Enter resume"></textarea> 
 		</div>
-		
-		<br> 
-		<input class="btn" type="submit" name="submit" value="Submit & Calculate">
+		<div class="w3-container w3-half">
+			<p> Job description</p>
+			<textarea rows="12" cols="60" name="job_description" id="job_description" class="form-control" placeholder="Enter job description"></textarea> 
+	</div>
+	</div>
+	
+	 
+	<br> 	
+	<br> 
+	<input class="btn" type="submit" name="submit" value="Submit">
+
 	</form>
 	<br>
-	<br>
-	<footer class="w3-container w3-teal">
-		<h5>The matching score is:</h5>
-		<h2>{{matching_score}}</h2>
-	</footer>
+	<div align="center" class="w3-container w3-teal">
+		{% if classified_title == '0' %}
+			<p>You are very likely applying a Machine Learning Engineer Position - {{classified_title}}.</p>
+		{% elif classified_title == '1' %}
+			<p>You are very likely applying a Data Scientist Position - {{classified_title}}.</p>
+		{% elif classified_title == '2' %}
+			<p>You are very likely applying a Data Engineer Position - {{classified_title}}.</p>
+		{% elif classified_title == '3' %}
+			<p>You are very likely applying a Data Analyst Position - {{classified_title}}.</p>
+		{% else %}
+			<p>{{classified_title}}</p>
+		{% endif %}
+		<h5>Your resume's matching score is: {{matching_score}}</h5>
+	</div>
+
 </div>
 </body>
 </html>

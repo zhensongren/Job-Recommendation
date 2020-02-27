@@ -8,24 +8,20 @@
 
 <div align="center">
 	<header class="w3-container w3-teal">
-	  <h1>Calculate your matching score!</h1>
+	  <h1>A recommended job list based on the skills in your resume</h1>
 	</header>
 </div>
 
 <form align="center" method="post" action="">
-	<p class="w3-container">The required skills key words in job description and your resume can be extracted. We'll calculate the matching score to let your know whether you have a good chance or not.
-	</p>    
-
-	<textarea autofocus rows="8" cols="60"  placeholder="job description"  name="job_description" id="job_description">
-	</textarea>
+	<p class="w3-container">Paste your skill keywords below-for example, python, aws, linux.</p>    
 	 
-	<textarea autofocus rows="8" cols="60" placeholder="resume" name="resume" id="resume">
+	<textarea autofocus rows="8" cols="60" placeholder="python, aws, linux" name="resume" id="resume">
 	</textarea>
-	<p><button type="submit" class="btn btn-primary">Submit & Calculate</button></p>
+	<p><button type="submit" class="btn btn-primary">Submit & Get job list</button></p>
 
 	<footer>
-		<h5>The matching score is:</h5>
-		<p>Score goes here</p>
+		<h5>The top 10 jobs recommended for you:</h5>
+		<p>A job list table with job title, location, company, matching score, link to apply</p>
 	</footer>
 </form>
 </body>

@@ -4,6 +4,7 @@ import click
 from flask import Flask, render_template, request, redirect, flash, url_for,session
 from flask_sqlalchemy import SQLAlchemy
 import score
+from classify import classify
 
 # get_text, PyPDF2
 
@@ -342,7 +343,8 @@ def home():
 		resume=user.resume
 		job_post=job.job_post
 		matching_score = score.get_score(skills=skills, job_post=job_post, resume=resume)
-		return render_template('home.html',matching_score=matching_score)
+		classified_title = classify(job_post)
+		return render_template('home.html',matching_score=matching_score, classified_title=classified_title)
 	else:
 		return render_template('home.html')
 		#return 'Saved  to the database!'
