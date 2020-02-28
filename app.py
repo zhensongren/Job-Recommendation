@@ -4,12 +4,15 @@ import click
 from flask import Flask, render_template, request, redirect, flash, url_for,session
 from flask_sqlalchemy import SQLAlchemy
 import score
+from sklearn.externals import joblib
+
 from classify import classify
 
 # get_text, PyPDF2
 
 app = Flask(__name__)
-
+classifier = joblib.load('indeed_LinearSVC.pkl')
+tfidfVectorizer = joblib.load('tfidfVectorizer.pkl')
 # SQLite URI compatible
 WIN = sys.platform.startswith('win')
 if WIN:
@@ -343,7 +346,7 @@ def home():
 		resume=user.resume
 		job_post=job.job_post
 		matching_score = score.get_score(skills=skills, job_post=job_post, resume=resume)
-		classified_title = classify(job_post)
+		classified_title = classify(job_post, preprocessor= tfidfVectorizer, model=classifier)
 		return render_template('home.html',matching_score=matching_score, classified_title=classified_title)
 	else:
 		return render_template('home.html')

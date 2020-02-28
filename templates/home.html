@@ -30,22 +30,20 @@
 	</div>
 	</div>
 	
-	 
-	<br> 	
-	<br> 
+	 <br> 
 	<input class="btn" type="submit" name="submit" value="Submit">
 
 	</form>
 	<br>
 	<div align="center" class="w3-container w3-teal">
 		{% if classified_title == '0' %}
-			<p>You are very likely applying a Machine Learning Engineer Position - {{classified_title}}.</p>
+			<p>You are very likely applying a <mark>Machine Learning Engineer</mark> Position.</p>
 		{% elif classified_title == '1' %}
-			<p>You are very likely applying a Data Scientist Position - {{classified_title}}.</p>
+			<p>You are very likely applying a <mark>Data Scientist</mark> Position.</p>
 		{% elif classified_title == '2' %}
-			<p>You are very likely applying a Data Engineer Position - {{classified_title}}.</p>
+			<p>You are very likely applying a <mark>Data Engineer</mark> Position.</p>
 		{% elif classified_title == '3' %}
-			<p>You are very likely applying a Data Analyst Position - {{classified_title}}.</p>
+			<p>You are very likely applying a <mark>Data Analyst</mark> Position.</p>
 		{% else %}
 			<p>{{classified_title}}</p>
 		{% endif %}

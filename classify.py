@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request
-from sklearn.externals import joblib
 import re 
 import nltk
 from nltk.corpus import stopwords
@@ -10,7 +9,7 @@ from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 
 
-def classify(text):
+def classify(text, preprocessor, model):
 
 	corpus = []
 	text = re.sub('[^a-zA-Z]', ' ', text)
@@ -21,10 +20,9 @@ def classify(text):
 	text = ' '.join(text)
 	corpus.append(text)
 	
-	classifier = joblib.load('indeed_LinearSVC.pkl')
-	tfidfVectorizer = joblib.load('tfidfVectorizer.pkl')
-	x_tfid = tfidfVectorizer.transform(corpus).toarray()
-	answer = classifier.predict(x_tfid)
+
+	x_tfid = preprocessor.transform(corpus).toarray()
+	answer = model.predict(x_tfid)
 	answer = str(answer[0])
 	
 	if answer == '0':
