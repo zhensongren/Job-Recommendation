@@ -130,3 +130,5 @@ data/
 
 # Virtual env folder
 env/
+create_container.txt
+data.db
