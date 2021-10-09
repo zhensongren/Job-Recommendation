@@ -1,70 +1,256 @@
-#! python3
-########################## Data Science Project - Jobs Recommendation Engine ############################################
-
-############################ Install necessary packages below before excuting this script################################
-# install the python-docx for word documents
-# pip install python-docx 
-# install the PyPDF2 for PDF documents 
-# pip install PyPDF2
-import os
-#import docx
-#import PyPDF2
-
-#import pandas as pd
-#import numpy as np
 from text_vectorizer import TextVectorizer 
 from sklearn.metrics.pairwise import cosine_similarity
-#import get_text
-"""
-############################ Extract words from data files #################################################################
-### Read content from resume in PDF format
-path = os.path.join('..', 'data', 'DS training LIGANG BAI.pdf')
-bai = get_text.get_pdf_text(path)
 
-### Read content from resume in docx file
-resume = get_text.get_doc_text('../data/Zhensong Ren_Resume.docx')
-
-### Read skills key words from crawler results
-path_DS = os.path.join('..', 'data', 'skills_data_scientist_processed.json')
-path_DA = os.path.join('..', 'data', 'skills_data_analyst_processed.json')
-path_DE = os.path.join('..', 'data', 'skills_data_engineer_processed.json')
-path_MLE = os.path.join('..', 'data', 'skills_machine_learning_engineer_processed.json')
-kw_DS = get_text.read_json(path_DS)
-kw_DA = get_text.read_json(path_DA)
-kw_DE = get_text.read_json(path_DE)
-kw_MLE = get_text.read_json(path_MLE)
-
-### Read all the job description files and read into a document list.
-path = '../data/'
-jobs = get_text.get_jobs(path)
-
-############################################# Vectorize the documents########################################################
-tv = TextVectorizer()
-tv.fit(kw_MLE) # fit with job skills key words
-resume = tv.transform(resume)
-bai = tv.transform(bai) 
-job0 = tv.transform(jobs[0]) 
-
-############################### Calculating the cosine simlarity as the matching score#######################################
-
-ZS_score = cosine_similarity(resume, job0)[0][0]
-bai_score = cosine_similarity(bai, job0)[0][0]
-"""
 ############################### Define a function for calculating matching score #######################################
 # Need the skills key word file for vectorization.
-def get_score(skills, job_post, resume):
+def get_score(job_post, resume):
+	skills = {'access': 'access',
+		'algorithm': 'algorithm',
+		'algorithms': 'algorithm',
+		'amazon': 'amazon',
+		'analysis': 'analysis',
+		'analytical': 'analysis',
+		'analytics': 'analysis',
+		'android': 'android',
+		'apache': 'apache',
+		'api': 'api',
+		'arduino': 'arduino',
+		'artificial': 'artificial',
+		'association': 'association',
+		'asteradata': 'asteradata',
+		'aws': 'aws',
+		'azure': 'azure',
+		'bash': 'bash',
+		'bayesian': 'bayesian',
+		'big': 'big',
+		'bootstrap': 'bootstrap',
+		'c#': 'c#',
+		'c+': 'c+',
+		'c++': 'c+',
+		'cassandra': 'cassandra',
+		'classification': 'classification',
+		'cleaning': 'cleaning',
+		'cloud': 'cloud',
+		'clustering': 'clustering',
+		'cnn': 'cnn',
+		'cnns': 'cnn',
+		'computer': 'computer',
+		'computing': 'computer',
+		'css': 'css',
+		'data': 'data',
+		'database': 'database',
+		'databases': 'database',
+		'db': 'db',
+		'ddpg': 'ddpg',
+		'decision': 'decision',
+		'deep': 'deep',
+		'design': 'design',
+		'detection': 'detection',
+		'development': 'development',
+		'distributed': 'distributed',
+		'django': 'django',
+		'docker': 'docker',
+		'dqn': 'dqn',
+		'eclipse': 'eclipse',
+		'elasticsearch': 'elasticsearch',
+		'engineer': 'engineer',
+		'etl': 'etl',
+		'excel': 'excel',
+		'extract': 'extract',
+		'flask': 'flask',
+		'forest': 'forest',
+		'fpga': 'fpga',
+		'gans': 'gans',
+		'git': 'git',
+		'github': 'github',
+		'google': 'google',
+		'googlevision': 'googlevision',
+		'gpu': 'gpu',
+		'hadoop': 'hadoop',
+		'hbase': 'hbase',
+		'hdfs': 'hdfs',
+		'hive': 'hive',
+		'html': 'html',
+		'image': 'image',
+		'impala': 'impala',
+		'instance': 'instance',
+		'intelligence': 'intelligence',
+		'java': 'java',
+		'javascript': 'javascript',
+		'jdbc': 'jdbc',
+		'jira': 'jira',
+		'jquery': 'jquery',
+		'js': 'js',
+		'json': 'json',
+		'k-nearest': 'k-nearest',
+		'kafka': 'kafka',
+		'keras': 'keras',
+		'kernel': 'kernel',
+		'language': 'language',
+		'latex': 'latex',
+		'learn': 'learn',
+		'learning': 'learn',
+		'linear': 'linear',
+		'linux': 'linux',
+		'load': 'load',
+		'logistic': 'logistic',
+		'lstms': 'lstms',
+		'machine': 'machine',
+		'management': 'management',
+		'mapreduce': 'mapreduce',
+		'mathematics': 'mathematics',
+		'matlab': 'matlab',
+		'matplotlib': 'matplotlib',
+		'microsoft': 'microsoft',
+		'mining': 'mining',
+		'mongodb': 'mongodb',
+		'ms': 'ms',
+		'multiple': 'multiple',
+		'mysql': 'mysql',
+		'natural': 'natural',
+		'neighbors': 'neighbors',
+		'neo': 'neo',
+		'net': 'neo',
+		'network': 'network',
+		'networks': 'network',
+		'neural': 'neural',
+		'nlp': 'nlp',
+		'nltk': 'nltk',
+		'node': 'node',
+		'nosql': 'nosql',
+		'numpy': 'numpy',
+		'object': 'object',
+		'ocr': 'ocr',
+		'ods': 'ods',
+		'office': 'office',
+		'olap': 'olap',
+		'opencv': 'opencv',
+		'oracle': 'oracle',
+		'pandas': 'pandas',
+		'parallel': 'parallel',
+		'php': 'php',
+		'pl': 'pl',
+		'polynomial': 'polynomial',
+		'postgressql': 'postgressql',
+		'powerbi': 'powerbi',
+		'ppo': 'ppo',
+		'processing': 'processing',
+		'programming': 'programming',
+		'pyspark': 'pyspark',
+		'python': 'python',
+		'pytorch': 'pytorch',
+		'random': 'random',
+		'react': 'react',
+		'redux': 'redux',
+		'regression': 'regression',
+		'reinforcement': 'reinforcement',
+		'rest': 'rest',
+		'rnns': 'rnns',
+		'sas': 'sas',
+		'scala': 'scala',
+		'science': 'science',
+		'scikit': 'scikit',
+		'scikit-learn': 'scikit-learn',
+		'scipy': 'scipy',
+		'segmentation': 'segmentation',
+		'selenium': 'selenium',
+		'server': 'server',
+		'services': 'services',
+		'signal': 'signal',
+		'simple': 'simple',
+		'software': 'software',
+		'spacy': 'spacy',
+		'spark': 'spacy',
+		'sql': 'sql',
+		'ssrs': 'ssrs',
+		'statistical': 'statistical',
+		'statistics': 'statistical',
+		'studio': 'studio',
+		'supervised': 'supervised',
+		'svm': 'svm',
+		'tableau': 'tableau',
+		'tensorflow': 'tensorflow',
+		'teradata': 'teradata',
+		'testing': 'testing',
+		'theano': 'theano',
+		'tnpg': 'tnpg',
+		'tools': 'tools',
+		'transform': 'transform',
+		'trees': 'trees',
+		'trpo': 'trpo',
+		'unix': 'unix',
+		'unsupervised': 'unsupervised',
+		'vba': 'vba',
+		'vision': 'vision',
+		'visual': 'visual',
+		'visualization': 'visualization',
+		'web': 'web',
+		'xml': 'xml',
+		'Python': 'Python',
+		'Genism': 'Genism',
+		'Statistics': 'Statistics',
+		'Pandas': 'Pandas',
+		'Git/github': 'Git/github',
+		'Image recognition': 'Image recognition',
+		'Java': 'Java',
+		'NLTK': 'NLTK',
+		'Probability': 'Probability',
+		'Scikit-learn': 'Scikit-learn',
+		'SQL': 'SQL',
+		'Natural language processing': 'Natural language processing',
+		'Scala': 'Scala',
+		'A/B testing': 'A/B testing',
+		'TensorFlow': 'TensorFlow',
+		'Mongodb': 'Mongodb',
+		'speech recognition': 'speech recognition',
+		'C++': 'C++',
+		'HDFS': 'HDFS',
+		'Multivariable Calculus': 'Multivariable Calculus',
+		'PyTorch': 'PyTorch',
+		'Flask': 'Flask',
+		'Language interpretation': 'Language interpretation',
+		'MATLAB': 'MATLAB',
+		'Hive': 'Hive',
+		'Linear Algebra': 'Linear Algebra',
+		'Keras': 'Keras',
+		'AWS': 'AWS',
+		'Autonomous\xa0driving': 'Autonomous\xa0driving',
+		'R': 'R',
+		'Hadoop': 'Hadoop',
+		'Information theory': 'Information theory',
+		'CV': 'CV',
+		'Linux/Unix': 'Linux/Unix',
+		'Recommender System': 'Recommender System',
+		'Spark': 'Spark',
+		'Real and complex anlysis': 'Real and complex anlysis',
+		'NLP': 'NLP',
+		'Git': 'Git',
+		'Preventive health care': 'Preventive health care',
+		'Optimization': 'Optimization',
+		'Machine Learning': 'Machine Learning',
+		'HTML': 'HTML',
+		'Deep Learning': 'Deep Learning',
+		'CSS': 'CSS',
+		'Numpy': 'Numpy',
+		'JavaScript': 'JavaScript',
+		'Scipy': 'Scipy',
+		'system design': 'system design',
+		'Matplotlib': 'Matplotlib',
+		'MySQL': 'MySQL',
+		'PostgreSQL': 'PostgreSQL',
+		'microservice': 'microservice',
+		'kubernetes': 'kubernetes',
+		'tensorflow serving': 'tensorflow serving',
+		'airflow': 'airflow',
+		'jenkins': 'jenkins',
+		'teamcity': 'teamcity',
+		'monitor': 'monitor',
+		'shell script': 'shell script',
+		'AWS lambda': 'AWS lambda'}
 	tv = TextVectorizer()
 	tv.fit(skills) # fit with job skills key words
 	resume = tv.transform(resume)
 	job = tv.transform(job_post) 
 	return cosine_similarity(resume, job)[0][0]
 
-"""
-############################### Save the calculated Cosine simlarity to 'score.txt' file ####################################
-score = open('../data/score.txt', 'w')
-score.write('My resume and MLE job matching score : {} \r\n'.format(ZS_score))
-score.write('Bai resume and MLE job matching score : {} \r\n'.format(bai_score))
-score.write('\r\n')
-score.write('Job post used :\r\n {} \r\n'.format(jobs[0]))
-score.close()
-"""
+	
