@@ -1,11 +1,7 @@
-from flask import Flask, render_template, request
 import re 
 import nltk
 from nltk.corpus import stopwords
-from sklearn.feature_extraction.text import TfidfVectorizer
-nltk.download('stopwords')
-nltk.download('wordnet')
-from nltk.corpus import stopwords
+
 from nltk.stem import WordNetLemmatizer
 
 

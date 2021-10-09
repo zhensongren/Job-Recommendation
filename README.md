@@ -15,7 +15,4 @@ $ local version running on http://127.0.0.1:5000/
 
 $ Visit http://35.192.189.73:5000/ for a demo I hosted on Google Cloud.
 
-$ To Do:
-	1. Get resume in PDF format and parse it to get more information. 
-	2. Extract job posts in runtime from job aggregation site for a specific user.
-	3. Keep the pasted text in the textbox after calculations.
+$ You can also use a Docker container to set up a development environment that is isolated from your local environment. https://code.visualstudio.com/docs/remote/containers-tutorial

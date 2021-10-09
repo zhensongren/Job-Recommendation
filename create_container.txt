@@ -1,0 +1,30 @@
+
+az acr build --image indeed-job-flask --registry jobs4you --file Dockerfile .
+
+az container create \
+  --subscription afd4d879-9ca1-48c1-9212-076ce70405b1 \
+  --resource-group job-recommendation-app \
+  --name jobs4you-dev \
+  --location centralus \
+  --image jobs4you.azurecr.io/indeed-job-flask:latest \
+  --registry-password 1+l3T7/ZOvKIRP2YiXclI8YTWx8N1lTo \
+  --registry-login-server jobs4you.azurecr.io \
+  --registry-username jobs4you \ 
+  --protocol TCP \
+  --ports 5000 \
+  --os-type Linux \
+  --cpu 1 \
+  --memory 0.5 \  
+  --dns-name-label jobs4you-dev
+  
+
+az container export -g job-recommendation-app --name jobs4you -f output.yaml
+add the registry-password
+az container create -g job-recommendation-app --name jobs4you-dev -f output.yaml
+
+az container show \
+  --resource-group job-recommendation-app \
+  --name jobs4you-dev \
+  --query "{FQDN:ipAddress.fqdn,ProvisioningState:provisioningState}" \
+  --out table
+

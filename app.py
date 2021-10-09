@@ -1,73 +1,16 @@
-import os
-import sys
-import click
+import nltk
+nltk.data.path.append('/app')
+nltk.download('stopwords', download_dir ='/app')
+nltk.download('wordnet', download_dir ='/app')
+
+import joblib
 from flask import Flask, render_template, request, redirect, flash, url_for,session
-from flask_sqlalchemy import SQLAlchemy
 import score
-from sklearn.externals import joblib
-
 from classify import classify
-
-# get_text, PyPDF2
-
-app = Flask(__name__)
 classifier = joblib.load('indeed_LinearSVC.pkl')
 tfidfVectorizer = joblib.load('tfidfVectorizer.pkl')
-# SQLite URI compatible
-WIN = sys.platform.startswith('win')
-if WIN:
-    prefix = 'sqlite:///'
-else:
-    prefix = 'sqlite:////'
-app.config['SQLALCHEMY_DATABASE_URI'] = prefix + os.path.join(app.root_path, 'data.db')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
 
-
-class User(db.Model):
-	id = db.Column(db.Integer, primary_key=True)
-	#name = db.Column(db.String(300))
-	#location = db.Column(db.String(100))
-	resume = db.Column(db.String(5000))
-
-
-class Job(db.Model):
-	id = db.Column(db.Integer, primary_key=True)
-	#title = db.Column(db.String(60))
-	#location = db.Column(db.String(100))
-	#post_date = db.Column(db.String(50))
-	job_post = db.Column(db.String(5000))
-	#link = db.Column(db.String(300))
-	#employer = db.Column(db.String(100))
-	
-	
-#Generate fake data
-name = 'Zhensong Ren'
-jobs = [
-{'employer':'Apple', 'title': 'Senior Data Scientist', 'post_date': '08/01/2019', 'link':'				https://jobs.apple.com/en-us/details/200063634/senior-lead-data-scientist'},
-{'employer':'Apple', 'title': 'Machine Learning Engineer', 'post_date': '08/01/2019', 'link':'https://jobs.apple.com/en-us/details/200029136/machine-learning-engineer'},
-{'employer':'Sam\'s Club', 'title': 'Data Scientist', 'post_date': '08/05/2019', 'link':'https://sjobs.brassring.com/TGnewUI/Search/home/HomeWithPreLoad?PageType=JobDetails&partnerid=25222&siteid=5022&jobid=1408817&codes=Indeed_Organic&utm_source=Indeed_Organic&utm_campaign=eCommerce%2Bwalmartlabs&utm_medium=AppFeeder&utm_term=walmartlabs%2BData_Science_and_Machine_Learning&utm_content=Data_Science_and_Machine_Learning#jobDetails=1408817_5022'},
-{'employer':'Shell', 'title': 'Machine Learning Engineer', 'post_date': '08/01/2019', 'link':'https://jobs.shell.com/job/houston/machine-learning-engineer-energy-platform-houston-tx/26631/12744472?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic'},
-{'employer':'Verizon', 'title': 'Senior Data Scientist', 'post_date': '08/01/2019', 'link':'http://jobs.verizon.com/jobs/4386284-senior-data-scientist?tm_job=524978-1A&tm_event=view&tm_company=781&bid=538&CID=pst'},
-{'employer':'Google', 'title': 'Machine Learning Engineer', 'post_date': '08/08/2019', 'link':'https://careers.google.com/jobs/results/5097432532451328-software-engineer-machine-learning/'},
-{'employer':'Facebook', 'title': 'Data Scientist', 'post_date': '08/01/2019', 'link':'https://www.facebook.com/careers/jobs/190268414894537/'},
-{'employer':'Microsoft', 'title': 'Senior Data Scientist', 'post_date': '08/09/2019', 'link':'https://careers.microsoft.com/us/en/job/639375/Senior-Data-Scientist'},
-{'employer':'Amazon', 'title': 'Data Scientist', 'post_date': '08/04/2019', 'link':'https://www.amazon.jobs/en/jobs/881117/data-scientist-nationwide-opportunities'},
-{'employer':'twitter', 'title': 'Machine Learning Engineer', 'post_date': '08/11/2019', 'link':'https://www.linkedin.com/jobs/view/machine-learning-engineer-health-ml-at-twitter-1432967907/?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic'},
-]
-	
-@app.cli.command()
-def forge():
-	
-	db.create_all()
-	user = User(name=name)
-	for job in jobs:
-		job = Job(title=job['title'], link=job['link'])
-		#job = Job(title=job['title'], post_date=job['post_date'], employer=job['employer'], link=job['link'], job_post=job['job_post'])
-		db.session.add(job)
-	db.session.add(user)
-	db.session.commit()
-	click.echo('Saved the fake data into database.')	
+app = Flask(__name__)
 
 skills = {'access': 'access',
  'algorithm': 'algorithm',
@@ -317,58 +260,26 @@ skills = {'access': 'access',
 @app.route('/', methods=['GET','POST'])
 @app.route('/home', methods=['GET','POST'])
 def home():
-	db.drop_all()
-	db.create_all()
 	if request.method == 'POST':
-		# Get the resume and save it into to database.
+		# Get the resume from user's input form
 		if 'resume' not in request.form:
-			flash('No input yet')
 			return redirect(request.url)
 		else:
 			resume = request.form['resume']
-			resume = User(resume=resume)
-			db.session.add(resume)
-			db.session.commit()
 			
-		# Get the job post and save it into database.
+		# Get the job post from user's input form
 		if 'job_description' not in request.form:
-			flash('No input yet')
 			return redirect(request.url)
 		else:
-		# Save the submited plain text data into database
 			job_post = request.form['job_description']
-			job_post = Job(job_post=job_post)
-			db.session.add(job_post)
-			db.session.commit()
-		# Query the database and get the matching score.
-		user = User.query.first()
-		job = Job.query.first()
-		resume=user.resume
-		job_post=job.job_post
+
 		matching_score = score.get_score(skills=skills, job_post=job_post, resume=resume)
+		matching_score = matching_score*100
+		matching_score= "{:.0f}".format(matching_score)
 		classified_title = classify(job_post, preprocessor= tfidfVectorizer, model=classifier)
 		return render_template('home.html',matching_score=matching_score, classified_title=classified_title)
 	else:
 		return render_template('home.html')
-		#return 'Saved  to the database!'
 		
-@app.route('/sendjob', methods=['GET', 'POST'])
-def send_job():
-	if request.method == 'POST':
-		if 'job_post' not in request.form:
-			flash('No input yet')
-			return redirect(request.url)
-		job_post = request.form['job_post']
-		job_post = Job(job_post=job_post)
-		db.session.add(job_post)
-		db.session.commit()
-		
-		user = User.query.first()
-		resume=user.resume
-		matching_score = score.get_score(skills=skills, job_post=job_post, resume=resume)
-		return render_template('score.html',matching_score=matching_score)
-	else:
-		return render_template('send_job.html')
-
 if __name__=='__main__':
 	app.run(debug=True, host="0.0.0.0", port=5000)
